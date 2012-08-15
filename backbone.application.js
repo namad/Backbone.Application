@@ -28,308 +28,308 @@
 
         $($.proxy(this.onReady, this));
     };
-	
-	_.extend(Application.prototype, {
 
-		models: {},
-		collections: {},
-		controllers: {},
+    _.extend(Application.prototype, {
 
-		/**
-		 * Abstract fuction that will be called during application instance creation
-		 */
-		initialize: function(options) {
-			return this;
-		},
+        models: {},
+        collections: {},
+        controllers: {},
 
-		/**
-		 * Called on documentReady
-		 */
-		onReady: function() {
-			// initialize controllers
-			this.initializeControllers(this.controllers || {});
-			// call to controller.onLauch callback
-			this.launchControllers();
-			// call application.lauch callback
-			this.launch.call(this);
-		},
+        /**
+         * Abstract fuction that will be called during application instance creation
+         */
+        initialize: function(options) {
+            return this;
+        },
 
-		/**
-		 * Function that will convert string identifier into the instance reference	 
-		 */ 
-		parseClasses: function(classes) {
-			var hashMap = {};
+        /**
+         * Called on documentReady
+         */
+        onReady: function() {
+            // initialize controllers
+            this.initializeControllers(this.controllers || {});
+            // call to controller.onLauch callback
+            this.launchControllers();
+            // call application.lauch callback
+            this.launch.call(this);
+        },
 
-			_.each(classes, function(cls) {
-				var classReference = resolveNamespace(cls),
-					id = cls.split('.').pop();
+        /**
+         * Function that will convert string identifier into the instance reference	 
+         */ 
+        parseClasses: function(classes) {
+            var hashMap = {};
 
-				hashMap[id] = classReference;
-			}, this);
+            _.each(classes, function(cls) {
+                var classReference = resolveNamespace(cls),
+                    id = cls.split('.').pop();
 
-			return hashMap;
-		},
-		
-		/**
-		 * Fuction that will loop through all application conrollers and create their instances
-		 * Additionaly, read the list of models and collections from each controller and save the reference within application
-		 */
-		initializeControllers: function(controllers) {
-			this.controllers = {};
+                hashMap[id] = classReference;
+            }, this);
 
-			_.each(controllers, function(ctrl) {
-				var classReference = resolveNamespace(ctrl),
-					id = ctrl.split('.').pop();
+            return hashMap;
+        },
+        
+        /**
+         * Fuction that will loop through all application conrollers and create their instances
+         * Additionaly, read the list of models and collections from each controller and save the reference within application
+         */
+        initializeControllers: function(controllers) {
+            this.controllers = {};
 
-				var controller = new classReference({
-					id: id,
-					application: this
-				});
+            _.each(controllers, function(ctrl) {
+                var classReference = resolveNamespace(ctrl),
+                    id = ctrl.split('.').pop();
 
-				controller.views = this.parseClasses(controller.views || []);
+                var controller = new classReference({
+                    id: id,
+                    application: this
+                });
 
-				_.extend(this.models, this.parseClasses(controller.models || []));
-				_.extend(this.collections, this.parseClasses(controller.collections || {}));
+                controller.views = this.parseClasses(controller.views || []);
 
-				this.buildCollections();
-				this.controllers[id] = controller;
-			}, this);
-		},
+                _.extend(this.models, this.parseClasses(controller.models || []));
+                _.extend(this.collections, this.parseClasses(controller.collections || {}));
 
-		/**
-		 * Launch all controllers using onLauch callback
-		 */
-		launchControllers: function() {
-			_.each(this.controllers, function(ctrl, id) {
-				ctrl.onLaunch(this);
-			}, this);
-		},
+                this.buildCollections();
+                this.controllers[id] = controller;
+            }, this);
+        },
 
-		/**
-		 * Abstract fuction that will be called during application lauch
-		 */
-		launch: function() {},
+        /**
+         * Launch all controllers using onLauch callback
+         */
+        launchControllers: function() {
+            _.each(this.controllers, function(ctrl, id) {
+                ctrl.onLaunch(this);
+            }, this);
+        },
 
-		/**
-		 * Abstract fuction that will be called during application lauch
-		 */
-		addListeners: function(listeners, controller) {
-			this.eventbus.addListeners(listeners, controller)
-		},
+        /**
+         * Abstract fuction that will be called during application lauch
+         */
+        launch: function() {},
 
-		/**
-		 * Getter to retreive link to the particular controller instance
-		 */
-		getController: function(id) {
-			return this.controllers[id];
-		},
+        /**
+         * Abstract fuction that will be called during application lauch
+         */
+        addListeners: function(listeners, controller) {
+            this.eventbus.addListeners(listeners, controller)
+        },
 
-		/**
-		 * Getter to retreive link to the particular model instance
-		 * If model instance isn't created, create it
-		 */
-		getModel: function(name) {
-			this._modelsCache = this._modelsCache || {};
+        /**
+         * Getter to retreive link to the particular controller instance
+         */
+        getController: function(id) {
+            return this.controllers[id];
+        },
 
-			var model = this._modelsCache[name],
-				modelClass = this.getModelConstructor(name);
+        /**
+         * Getter to retreive link to the particular model instance
+         * If model instance isn't created, create it
+         */
+        getModel: function(name) {
+            this._modelsCache = this._modelsCache || {};
 
-			if(!model && modelClass) {
-				model = this.createModel(name);
-				this._modelsCache[name] = model;
-			}
+            var model = this._modelsCache[name],
+                modelClass = this.getModelConstructor(name);
 
-			return model || null;
-		},
+            if(!model && modelClass) {
+                model = this.createModel(name);
+                this._modelsCache[name] = model;
+            }
 
-		/**
-		 * Getter to retreive link to the particular model consturctor
-		 */
-		getModelConstructor: function(name) {
-			return this.models[name];
-		},
+            return model || null;
+        },
 
-		/**
-		 * Function to create new model instance
-		 */
-		createModel: function(name, options) {
-			var modelClass = this.getModelConstructor(name),
-				options = _.extend(options || {});
+        /**
+         * Getter to retreive link to the particular model consturctor
+         */
+        getModelConstructor: function(name) {
+            return this.models[name];
+        },
 
-			var model = new modelClass(options);
+        /**
+         * Function to create new model instance
+         */
+        createModel: function(name, options) {
+            var modelClass = this.getModelConstructor(name),
+                options = _.extend(options || {});
 
-			return model;
-		},
+            var model = new modelClass(options);
 
-		/**
-		 * Getter to retreive link to the particular collection instance
-		 * If collection instance isn't created, create it
-		 */
-		getCollection: function(name) {
-			this._collectionsCache = this._collectionsCache || {};
+            return model;
+        },
 
-			var collection = this._collectionsCache[name],
-				collectionClass = this.getCollectionConstructor(name);
+        /**
+         * Getter to retreive link to the particular collection instance
+         * If collection instance isn't created, create it
+         */
+        getCollection: function(name) {
+            this._collectionsCache = this._collectionsCache || {};
 
-			if(!collection && collectionClass) {
-				collection = this.createCollection(name);
-				this._collectionsCache[name] = collection;
-			}
+            var collection = this._collectionsCache[name],
+                collectionClass = this.getCollectionConstructor(name);
 
-			return collection || null;
-		},
+            if(!collection && collectionClass) {
+                collection = this.createCollection(name);
+                this._collectionsCache[name] = collection;
+            }
 
-		/**
-		 * Getter to retreive link to the particular collection consturctor
-		 */	
-		getCollectionConstructor: function(name) {
-			return this.collections[name];
-		},
+            return collection || null;
+        },
 
-		/**
-		 * Function to create new collection instance
-		 */	
-		createCollection: function(name, options) {
-			var collectionClass = this.getCollectionConstructor(name),
-				options = _.extend(options || {});
+        /**
+         * Getter to retreive link to the particular collection consturctor
+         */	
+        getCollectionConstructor: function(name) {
+            return this.collections[name];
+        },
 
-			var collection = new collectionClass()
+        /**
+         * Function to create new collection instance
+         */	
+        createCollection: function(name, options) {
+            var collectionClass = this.getCollectionConstructor(name),
+                options = _.extend(options || {});
 
-			return collection;
-		},
+            var collection = new collectionClass()
 
-		/**
-		 * Function that will loop throught the list of collection constructors and create instances
-		 */
-		buildCollections: function() {
-			_.each(this.collections, function(collection, alias) {
-				this.getCollection(alias);
-			}, this);
-		}
-	});
+            return collection;
+        },
+
+        /**
+         * Function that will loop throught the list of collection constructors and create instances
+         */
+        buildCollections: function() {
+            _.each(this.collections, function(collection, alias) {
+                this.getCollection(alias);
+            }, this);
+        }
+    });
 
 
-	// Since we are using Backbone let's make sure that there are no conflicts in namespaces
-	if(typeof Backbone.Application == 'undefined') {
-		Backbone.Application = Application;
-	}
-	else {
-		throw ('Native Backbone.Application instance already defined.')
-	}
+    // Since we are using Backbone let's make sure that there are no conflicts in namespaces
+    if(typeof Backbone.Application == 'undefined') {
+        Backbone.Application = Application;
+    }
+    else {
+        throw ('Native Backbone.Application instance already defined.')
+    }
 
-	var Controller = function(options) {
-		_.extend(this, options || {});
-		this.initialize.apply(this, arguments);
-	};
+    var Controller = function(options) {
+        _.extend(this, options || {});
+        this.initialize.apply(this, arguments);
+    };
 
-	_.extend(Controller.prototype, Backbone.Events, {
-		views: {},
-		models: {},
-		collections: {},
+    _.extend(Controller.prototype, Backbone.Events, {
+        views: {},
+        models: {},
+        collections: {},
 
-		initialize: function(options) {
-		},
+        initialize: function(options) {
+        },
 
-		/**
-		 * Add new listener to the application event bus
-		 */
-		addListeners: function(listeners) {
-			this.getApplication().addListeners(listeners, this);
-		},
+        /**
+         * Add new listener to the application event bus
+         */
+        addListeners: function(listeners) {
+            this.getApplication().addListeners(listeners, this);
+        },
 
-		/**
-		 * Abstract fuction that will be called during application lauch
-		 */	
-		onLaunch: function(application) {
-		},
+        /**
+         * Abstract fuction that will be called during application lauch
+         */	
+        onLaunch: function(application) {
+        },
 
-		/**
-		 * Getter that will return the reference to the application instance
-		 */	
-		getApplication: function() {
-			return this.application;
-		},
+        /**
+         * Getter that will return the reference to the application instance
+         */	
+        getApplication: function() {
+            return this.application;
+        },
 
-		/**
-		 * Getter that will return the reference to the view instance
-		 */	
-		getView: function(name) {
-			return this._viewsCache[name];
-		},
+        /**
+         * Getter that will return the reference to the view instance
+         */	
+        getView: function(name) {
+            return this._viewsCache[name];
+        },
 
-		/**
-		 * Getter that will return the reference to the view constructor
-		 */		
-		getViewConstructor: function(name) {
-			return this.views[name];
-		},
+        /**
+         * Getter that will return the reference to the view constructor
+         */		
+        getViewConstructor: function(name) {
+            return this.views[name];
+        },
 
-		/**
-		 * Function to create a new view instance
-		 * All views are cached within _viewsCache hash map
-		 */
-		createView: function(name, options) {
-			var view = this.getViewConstructor(name),
-				options = _.extend(options || {}, {
-					alias: name
-				});
+        /**
+         * Function to create a new view instance
+         * All views are cached within _viewsCache hash map
+         */
+        createView: function(name, options) {
+            var view = this.getViewConstructor(name),
+                options = _.extend(options || {}, {
+                    alias: name
+                });
 
-			this._viewsCache = this._viewsCache || {};
+            this._viewsCache = this._viewsCache || {};
 
-			this._viewsCache[name] = new view(options);
+            this._viewsCache[name] = new view(options);
 
-			return this._viewsCache[name]
-		},
+            return this._viewsCache[name]
+        },
 
-		/**
-		 * Delegate method to get model instance reference
-		 */		
-		getModel: function(name) {
-			return this.application.getModel(name);
-		},
+        /**
+         * Delegate method to get model instance reference
+         */		
+        getModel: function(name) {
+            return this.application.getModel(name);
+        },
 
-		/**
-		 * Delegate method to get model constructor reference
-		 */		
-		getModelConstructor: function(name) {
-			return this.application.getModelConstructor(name);
-		},
+        /**
+         * Delegate method to get model constructor reference
+         */		
+        getModelConstructor: function(name) {
+            return this.application.getModelConstructor(name);
+        },
 
-		/**
-		 * Delegate method to create model instance
-		 */		
-		createModel: function(name, options) {
-			return this.application.createModel(name)
-		},
+        /**
+         * Delegate method to create model instance
+         */		
+        createModel: function(name, options) {
+            return this.application.createModel(name)
+        },
 
-		/**
-		 * Delegate method to get collection instance reference
-		 */		
-		getCollection: function(name) {
-			return this.application.getCollection(name);
-		},
+        /**
+         * Delegate method to get collection instance reference
+         */		
+        getCollection: function(name) {
+            return this.application.getCollection(name);
+        },
 
-		/**
-		 * Delegate method to get collection constructor reference
-		 */		
-		getCollectionConstructor: function(name) {
-			return this.application.getCollectionConstructor(name);
-		},
+        /**
+         * Delegate method to get collection constructor reference
+         */		
+        getCollectionConstructor: function(name) {
+            return this.application.getCollectionConstructor(name);
+        },
 
-		/**
-		 * Delegate method to create collection instance
-		 */		
-		createCollection: function(name, options) {
-			return this.application.createCollection(name);
-		},
+        /**
+         * Delegate method to create collection instance
+         */		
+        createCollection: function(name, options) {
+            return this.application.createCollection(name);
+        },
 
-		/**
-		 * Delegate method to fire event
-		 */		
-		fireEvent: function(selector, event, args) {
-			this.application.eventbus.fireEvent(selector, event, args);
-		}
-	});
+        /**
+         * Delegate method to fire event
+         */		
+        fireEvent: function(selector, event, args) {
+            this.application.eventbus.fireEvent(selector, event, args);
+        }
+    });
 
     if(typeof Backbone.Controller == 'undefined') {
         Backbone.Controller = Controller;
@@ -338,83 +338,83 @@
         throw ('Native Backbone.Controller instance already defined.')
     }
 
-	var EventBus = function(options) {
-		var me = this;
+    var EventBus = function(options) {
+        var me = this;
 
-		_.extend(this, options || {});
+        _.extend(this, options || {});
 
-		_.extend(Backbone.View.prototype, {
-			alias: null,
-			getAlias: function() {
-				return this.options.alias;
-			},
-			/*
-			 * Instead of calling View.trigger lets use custom function
-			 * It will notify the EventBus about new event
-			 */
-			fireEvent: function(event, args) {
-				this.trigger.apply(this, arguments);
-				me.fireEvent(this.getAlias(), event, args);
-			}
-		});
-	};
+        _.extend(Backbone.View.prototype, {
+            alias: null,
+            getAlias: function() {
+                return this.options.alias;
+            },
+            /*
+             * Instead of calling View.trigger lets use custom function
+             * It will notify the EventBus about new event
+             */
+            fireEvent: function(event, args) {
+                this.trigger.apply(this, arguments);
+                me.fireEvent(this.getAlias(), event, args);
+            }
+        });
+    };
 
-	_.extend(EventBus.prototype, {
-		pool: {},
-		/*
-		listeners = {
-			'view_alias': {
-				'event_name': fn
-			}
-		}
-		 */
-		addListeners: function(selectors, controller) {
+    _.extend(EventBus.prototype, {
+        pool: {},
+        /*
+        listeners = {
+            'view_alias': {
+                'event_name': fn
+            }
+        }
+         */
+        addListeners: function(selectors, controller) {
 
-			this.pool[controller.id] = this.pool[controller.id] || {};
-			var pool = this.pool[controller.id];
+            this.pool[controller.id] = this.pool[controller.id] || {};
+            var pool = this.pool[controller.id];
 
-			if(_.isArray(selectors)) {
-				_.each(selectors, function(selector) {
-					this.control(selector, controller);
-				}, this)
-			}
-			else if(_.isObject(selectors)) {
-				_.each(selectors, function(listeners, selector) {
-					_.each(listeners, function(listener, event) {
-						pool[selector] = pool[selector] || {};
-						pool[selector][event] = pool[selector][event] || [];
+            if(_.isArray(selectors)) {
+                _.each(selectors, function(selector) {
+                    this.control(selector, controller);
+                }, this)
+            }
+            else if(_.isObject(selectors)) {
+                _.each(selectors, function(listeners, selector) {
+                    _.each(listeners, function(listener, event) {
+                        pool[selector] = pool[selector] || {};
+                        pool[selector][event] = pool[selector][event] || [];
 
-						pool[selector][event].push(listener);
+                        pool[selector][event].push(listener);
 
-					}, this);
-				}, this)
+                    }, this);
+                }, this)
 
-			}
-		},
+            }
+        },
 
-		fireEvent: function(selector, event, args) {
-			var application = this.getApplication();
+        fireEvent: function(selector, event, args) {
+            var application = this.getApplication();
 
-			_.each(this.pool, function(eventsPoolByAlias, controllerId) {
-				var events = eventsPoolByAlias[selector];
+            _.each(this.pool, function(eventsPoolByAlias, controllerId) {
+                var events = eventsPoolByAlias[selector];
 
-				if(events) {
-					var listeners = events[event]
-						controller = application.getController(controllerId);
+                if(events) {
+                    var listeners = events[event]
+                        controller = application.getController(controllerId);
 
-					_.each(listeners, function(fn) {
-						fn.apply(controller, args);
-					});
-				}
+                    _.each(listeners, function(fn) {
+                        fn.apply(controller, args);
+                    });
+                }
 
 
-			}, this);
-		},
+            }, this);
+        },
 
-		getApplication: function() {
-			return this.options['application'];
-		}
-	});
+        getApplication: function() {
+            return this.options['application'];
+        }
+    });
 
     Application.extend = Backbone.Model.extend;
     Controller.extend = Backbone.Model.extend;
