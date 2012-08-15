@@ -9,21 +9,16 @@ This is simply yet effective implementation of the MVC pattern. 2 new classes ha
 Before you start, it might be good idea to define application namespace, where all parts will be defined.
 ```Javascript
 var FormBuilder = {
-	controller: {},
-	model: {},
-	view: {},
-	collection: {}
-}
-```
-## Defining new application
-Each application should start from defining your application constructor. Setup nameSpace property to define the global variable for the entire application and name property to define a variable for application instance within global namespace.
-```Javascript
-FormBuilder.Application = Backbone.Application.extend({
 	Controllers: {},
 	Models: {},
 	Views: {},
-	Collections: {},
-	
+	Collections: {}
+}
+```
+## Defining new application
+Each application should start from defining your application constructor. Setup `nameSpace` property to define the global variable for the entire application and `name` property to define a variable for application instance within global namespace.
+```Javascript
+FormBuilder.Application = Backbone.Application.extend({
 	name: 'app',
 	nameSpace: 'FormBuilder',
 	
@@ -34,7 +29,7 @@ FormBuilder.Application = Backbone.Application.extend({
 	]
 });
 ```
-In result, application will be available in window.FormBuilder.app varible.
+In result, application will be available in global FormBuilder.app varible.
 
 ## Defining a controller
 Controllers are used to bind all application parts together. All they really do is listen for events (usually from views and other controllers) and take some action.
@@ -55,7 +50,7 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 });
 ```
 
-Controller.initialize function is a great place to setup controller event listeners. Simply call Controller.addListeners function and pass the list of views in order to handle view events. In our example, let's listen for 'toolbar.action' event from FormManager view:
+`Controller.initialize` function is a great place to setup controller event listeners. Simply call `Controller.addListeners` function and pass the list of views in order to handle view events. In our example, let's listen for `'toolbar.action'` event from `FormManager` view:
 ```Javascript
 FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 	...		
@@ -73,7 +68,7 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 });
 ```
 
-Each controller has onLauch callback which is great place to set up controller basics. Let's create Form model, then FormManager view and render it.
+Each controller has `onLauch` callback which is great place to set up controller basics. Let's create `Form` model, then `FormManager` view and render it.
 ```Javascript
 FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 	...		
@@ -90,3 +85,27 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 ```
 
 ## Defining a view
+It's pretty much the same as original [Backbone.View](http://backbonejs.org/#View), but there are small difference. In order to enable controller level events, use `View.fireEvent` method instead of default `View.trigger`. Let's see how we can fire up `'toolbar.action'` events from `FormManager` view in order to notify `UserManager` controller about that actions.
+```Javascript
+FormBuilder.Views.FormManager = Backbone.View.extend({
+	events: {
+		'click .toolbar button': 'onToolbarButtonClick'
+	},
+	...		
+	onToolbarButtonClick: function(event) {
+		var button = $(event.currentTarget),
+			action = button.data('action');
+			
+		this.fireEvent('toolbar.action', [action]);
+	}
+	...
+});
+```
+That's it! All controllers, that are listen for the `FormManager` will know about that event.
+
+## Runnin an application
+When all parts are defined, it's time to launch our application. 
+```Javascript
+new FormBuilder.Application();
+```
+Yay! New application instance is created and ready to rock ;)
