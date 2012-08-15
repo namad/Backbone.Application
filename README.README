@@ -90,3 +90,5 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 ```
 
 ## Defining a view
+
+![alt text](https://github.com/namad/visualHUD/blob/master/vhud_2.0.jpg?raw=true "Title")
