@@ -6,7 +6,7 @@ This is simply yet effective implementation of the MVC pattern. 2 new classes ha
 
 # Usage
 ## Setting up namespace
-Before you start, it might be good idea to define application namespace, where all parts will be defined.
+Before you start, it might be good idea to define application namespace, where all parts will be defined. Let'd do the quick setup for our FormBuilder application.
 ```Javascript
 var FormBuilder = {
 	Controllers: {},
