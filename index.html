@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Backbone.Application : Simple implmentation of the MVC pattern using Backbone.js" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Backbone.Application</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/namad/Backbone.Application">View on GitHub</a>
+
+          <h1 id="project_title">Backbone.Application</h1>
+          <h2 id="project_tagline">Simple implmentation of the MVC pattern using Backbone.js</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/namad/Backbone.Application/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/namad/Backbone.Application/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Basic MVC implementation for backbone.js</h1>
+
+<p>This is simply yet effective implementation of the MVC pattern. 2 new classes has been added to the Backbone namespace:</p>
+
+<ul>
+<li>Backbone.Application</li>
+<li>Backbone.Controller</li>
+</ul><h1>Usage</h1>
+
+<h2>Setting up namespace</h2>
+
+<p>Before you start, it might be good idea to define application namespace, where all parts will be defined. Let'd do the quick setup for our FormBuilder application.</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">FormBuilder</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">Controllers</span><span class="o">:</span> <span class="p">{},</span>
+    <span class="nx">Models</span><span class="o">:</span> <span class="p">{},</span>
+    <span class="nx">Views</span><span class="o">:</span> <span class="p">{},</span>
+    <span class="nx">Collections</span><span class="o">:</span> <span class="p">{}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>Defining new application</h2>
+
+<p>Each application should start from defining your application constructor. Setup <code>nameSpace</code> property to define the global variable for the entire application and <code>name</code> property to define a variable for application instance within global namespace.</p>
+
+<div class="highlight"><pre><span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Application</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="s1">'app'</span><span class="p">,</span>
+    <span class="nx">nameSpace</span><span class="o">:</span> <span class="s1">'FormBuilder'</span><span class="p">,</span>
+
+    <span class="nx">controllers</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">'FormBuilder.Controllers.FormManager'</span><span class="p">,</span>
+        <span class="s1">'FormBuilder.Controllers.Administration'</span><span class="p">,</span>
+        <span class="s1">'FormBuilder.Controllers.RunTime'</span>
+    <span class="p">]</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>In result, application will be available in global FormBuilder.app varible.</p>
+
+<h2>Defining a controller</h2>
+
+<p>Controllers are used to bind all application parts together. All they really do is listen for events (usually from views and other controllers) and take some action.</p>
+
+<div class="highlight"><pre><span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Controllers</span><span class="p">.</span><span class="nx">UserManager</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    <span class="nx">models</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">'FormBuilder.Models.Form'</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="nx">collections</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">'FormBuilder.Collections.Forms'</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="nx">views</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">'FormBuilder.Views.FormManager'</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">});</span>
+</pre></div>
+
+<p><code>Controller.initialize</code> function is a great place to setup controller event listeners. Simply call <code>Controller.addListeners</code> function and pass the list of views in order to handle view events. In our example, let's listen for <code>'toolbar.action'</code> event from <code>FormManager</code> view:</p>
+
+<div class="highlight"><pre><span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Controllers</span><span class="p">.</span><span class="nx">UserManager</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    <span class="p">...</span>     
+    <span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">addListeners</span><span class="p">({</span>
+            <span class="s1">'FormManager'</span><span class="o">:</span> <span class="p">{</span>
+                <span class="s1">'toolbar.action'</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">toolbarAction</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">},</span>
+
+    <span class="nx">toolbarAction</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// code here</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>Each controller has <code>onLauch</code> callback which is great place to set up controller basics. Let's create <code>Form</code> model, then <code>FormManager</code> view and render it.</p>
+
+<div class="highlight"><pre><span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Controllers</span><span class="p">.</span><span class="nx">UserManager</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    <span class="p">...</span>     
+    <span class="nx">onLaunch</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">formModel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">getModel</span><span class="p">(</span><span class="s1">'Form'</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">formView</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">createView</span><span class="p">(</span><span class="s1">'FormManager'</span><span class="p">,</span> <span class="p">{</span>
+            <span class="nx">model</span><span class="o">:</span> <span class="nx">formModel</span>
+        <span class="p">});</span>
+
+        <span class="nx">formView</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>Defining a view</h2>
+
+<p>It's pretty much the same as original <a href="http://backbonejs.org/#View">Backbone.View</a>, but there are small difference. In order to enable controller level events, use <code>View.fireEvent</code> method instead of default <code>View.trigger</code>. Let's see how we can fire up <code>'toolbar.action'</code> events from <code>FormManager</code> view in order to notify <code>UserManager</code> controller about that actions.</p>
+
+<div class="highlight"><pre><span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Views</span><span class="p">.</span><span class="nx">FormManager</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    <span class="nx">events</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s1">'click .toolbar button'</span><span class="o">:</span> <span class="s1">'onToolbarButtonClick'</span>
+    <span class="p">},</span>
+    <span class="p">...</span>     
+    <span class="nx">onToolbarButtonClick</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">button</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">),</span>
+            <span class="nx">action</span> <span class="o">=</span> <span class="nx">button</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">'action'</span><span class="p">);</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">fireEvent</span><span class="p">(</span><span class="s1">'toolbar.action'</span><span class="p">,</span> <span class="p">[</span><span class="nx">action</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>That's it! All controllers, that are listen for the <code>FormManager</code> will know about that event.</p>
+
+<h2>Runnin an application</h2>
+
+<p>When all parts are defined, it's time to launch our application. </p>
+
+<div class="highlight"><pre><span class="k">new</span> <span class="nx">FormBuilder</span><span class="p">.</span><span class="nx">Application</span><span class="p">();</span>
+</pre></div>
+
+<p>Yay! New application instance is created and ready to rock ;)</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Backbone.Application maintained by <a href="https://github.com/namad">namad</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
