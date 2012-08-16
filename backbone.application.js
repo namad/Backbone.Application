@@ -13,28 +13,57 @@
 
     var Application = function(options) {
         _.extend(this, options || {});
+        
         this.eventbus = new EventBus({application: this});
+        
+        this.createApplicationNamespace();
         this.initialize.apply(this, arguments);
-
-        var nameSpace = window;
-
-        // create global reference in the defined namespace
-        if(this.nameSpace) {
-            nameSpace = nameSpace[this.nameSpace]
-        }
-        if(this.name) {
-            nameSpace[this.name] = this;
-        }
 
         $($.proxy(this.onReady, this));
     };
 
     _.extend(Application.prototype, {
-
+        name: 'Backbone.Application',
+        
         models: {},
         collections: {},
         controllers: {},
+        
+        allocationMap: {
+            model: 'Models',
+            collection: 'Collections',
+            controller: 'Controllers',
+            view: 'Views'
+        },
 
+        createApplicationNamespace: function() {
+            var nameSpace = window;
+
+            // create global reference in the defined namespace
+            if(this.nameSpace) {
+                // if it wasn't already defined, create it
+                if(typeof nameSpace[this.nameSpace] == 'undefined') {
+                    nameSpace[this.nameSpace] = {}
+                }
+                nameSpace = nameSpace[this.nameSpace];
+            }
+
+            // let's have a link to the application namespace
+            // this way we will be able to get all references to Models, Collections and Controllers
+            // using givin namespace
+            this.nameSpace = nameSpace;
+            
+            if(this.name) {
+                nameSpace[this.name] = this;
+            }
+            else {
+                console.warn('Application has no name property defined. Global link was not created!');
+            }
+
+            .each(this.allocationMap, function(name, key) {
+                nameSpace[name] = {};
+            }, this);
+        },
         /**
          * Abstract fuction that will be called during application instance creation
          */
@@ -57,11 +86,13 @@
         /**
          * Function that will convert string identifier into the instance reference	 
          */ 
-        parseClasses: function(classes) {
-            var hashMap = {};
+        getClasseRefs: function(type, classes) {
+            var hashMap = {},
+                allocationMap = allocationMap[type],
+                root = allocationMap[this.nameSpace];
 
             _.each(classes, function(cls) {
-                var classReference = resolveNamespace(cls),
+                var classReference = resolveNamespace(cls, root),
                     id = cls.split('.').pop();
 
                 hashMap[id] = classReference;
@@ -86,10 +117,10 @@
                     application: this
                 });
 
-                controller.views = this.parseClasses(controller.views || []);
+                controller.views = this.getClasseRefs('view', controller.views || []);
 
-                _.extend(this.models, this.parseClasses(controller.models || []));
-                _.extend(this.collections, this.parseClasses(controller.collections || {}));
+                _.extend(this.models, this.getClasseRefs('model', controller.models || []));
+                _.extend(this.collections, this.getClasseRefs('collections', controller.collections || {}));
 
                 this.buildCollections();
                 this.controllers[id] = controller;
