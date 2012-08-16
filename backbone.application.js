@@ -61,7 +61,7 @@
             }
 
             _.each(this.allocationMap, function(name, key) {
-                nameSpace[name] = {};
+                nameSpace[name] = nameSpace[name] || {};
             }, this);
         },
         /**
@@ -88,14 +88,14 @@
          */ 
         getClasseRefs: function(type, classes) {
             var hashMap = {},
-                allocationMap = allocationMap[type],
-                root = allocationMap[this.nameSpace];
+                allocationMap = this.allocationMap[type],
+                root = this.nameSpace[allocationMap];
 
             _.each(classes, function(cls) {
                 var classReference = resolveNamespace(cls, root),
                     id = cls.split('.').pop();
 
-                hashMap[id] = classReference;
+                hashMap[cls] = classReference;
             }, this);
 
             return hashMap;
@@ -109,11 +109,12 @@
             this.controllers = {};
 
             _.each(controllers, function(ctrl) {
-                var classReference = resolveNamespace(ctrl),
+                var root =  this.nameSpace[this.allocationMap.controller],
+                    classReference = resolveNamespace(ctrl, root),
                     id = ctrl.split('.').pop();
 
                 var controller = new classReference({
-                    id: id,
+                    id: ctrl,
                     application: this
                 });
 
@@ -123,7 +124,7 @@
                 _.extend(this.collections, this.getClasseRefs('collections', controller.collections || {}));
 
                 this.buildCollections();
-                this.controllers[id] = controller;
+                this.controllers[ctrl] = controller;
             }, this);
         },
 
