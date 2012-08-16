@@ -254,7 +254,8 @@
         this.initialize.apply(this, arguments);
     };
 
-    _.extend(Controller.prototype, Backbone.Events, {
+    _.extend(Controller.prototype, {
+        name: null,
         views: {},
         models: {},
         collections: {},
@@ -366,6 +367,7 @@
 
         _.extend(Backbone.View.prototype, {
             alias: null,
+            hidden: false,
             getAlias: function() {
                 return this.options.alias;
             },
@@ -376,6 +378,14 @@
             fireEvent: function(event, args) {
                 this.trigger.apply(this, arguments);
                 me.fireEvent(this.getAlias(), event, args);
+            },
+            hide: function() {
+                this.$el.hide();
+                this.hidden = true;
+            },
+            show: function() {
+                this.$el.show();
+                this.hidden = false;
             }
         });
     };
@@ -392,7 +402,7 @@
 
             if(_.isArray(selectors)) {
                 _.each(selectors, function(selector) {
-                    this.control(selector, controller);
+                    this.addListeners(selector, controller);
                 }, this)
             }
             else if(_.isObject(selectors)) {
