@@ -32,8 +32,8 @@ FormBuilder.Application = Backbone.Application.extend({
 В результате, мы всегда сможем обратится к приложению из глобального пространства имём используя переменную `FormBuilder.app`
 
 
-## Опрре
-Controllers are used to bind all application parts together. All they really do is listen for events (usually from views and other controllers) and take some action.
+## Определяем контроллер
+Чтобы связать части приложения воедино, нам нужны контроллеры. Их основная задача - слушать события (как правило, от созданных view и других контроллеров) и предпренимать соотвествующие действия.
 ```Javascript
 FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 	models: [
@@ -51,7 +51,8 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 });
 ```
 
-`Controller.initialize` function is a great place to setup controller event listeners. Simply call `Controller.addListeners` function and pass the list of views in order to handle view events. In our example, let's listen for `'toolbar.action'` event from `FormManager` view:
+Функция `Controller.initialize` - это отличное место, чтобы подписаться на события и определить, какие действия должны быть выполнены в результаты.
+ Для этого используем функцию `Controller.addListeners`, передав в неё список компонентов и событий. В нашем примере, мы будем слушать событие `'toolbar.action'`, которое генерирует компонент `FormManager`:
 ```Javascript
 FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 	...		
@@ -69,7 +70,7 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 });
 ```
 
-Each controller has `onLauch` callback which is great place to set up controller basics. Let's create `Form` model, then `FormManager` view and render it.
+У каждого контроллера есть callback `onLauch`, который можно использовать для начала работы. Давайте создадим модель `Form`, компонент `FormManager` и отрендерим его на странице.
 ```Javascript
 FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 	...		
@@ -85,8 +86,8 @@ FormBuilder.Controllers.UserManager = Backbone.Controller.extend({
 });
 ```
 
-## Defining a view
-It's pretty much the same as original [Backbone.View](http://backbonejs.org/#View), but there are small difference. In order to enable controller level events, use `View.fireEvent` method instead of default `View.trigger`. Let's see how we can fire up `'toolbar.action'` events from `FormManager` view in order to notify `UserManager` controller about that actions.
+## Определение view
+ВО многом, работа с компонентами ничем не отличается от оригинального [Backbone.View](http://backbonejs.org/#View), но есть небольшие и важные отличия. Для того, чтобы дать возможность отслеживать события на уровне контроллера, был добавлен метод `View.fireEvent`. Именно он оповестит все подписанные контроллеры о том, что произошло какое-то событие. Давайте посмотрим, как это работает в нашем примере. Пусть компонент сгенерирует событие `'toolbar.action'` и оповестит контроллер `UserManager`.
 ```Javascript
 FormBuilder.Views.FormManager = Backbone.View.extend({
 	events: {
@@ -102,11 +103,11 @@ FormBuilder.Views.FormManager = Backbone.View.extend({
 	...
 });
 ```
-That's it! All controllers, that are listen for the `FormManager` will know about that event.
+Теперь все контроллеры могут подписаться на события от `FormManager` и реагировать соотвествущим образом.
 
-## Runnin an application
-When all parts are defined, it's time to launch our application. 
+## Запуск приложения
+После того, как все ключевые части определены, можно запускать наше приложение
 ```Javascript
 new FormBuilder.Application();
 ```
-Yay! New application instance is created and ready to rock ;)
+Ура! Новый экземпляр нашего приложения готов рулить и разруливать :)
