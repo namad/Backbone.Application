@@ -251,13 +251,6 @@
         },
 
         /**
-         * Getter that will return the reference to the view instance
-         */	
-        getView: function(name) {
-            return this._viewsCache[name];
-        },
-
-        /**
          * Getter that will return the reference to the view constructor
          */		
         getViewConstructor: function(name) {
@@ -274,11 +267,7 @@
                     alias: name
                 });
 
-            this._viewsCache = this._viewsCache || {};
-
-            this._viewsCache[name] = new view(options);
-
-            return this._viewsCache[name]
+            return new view(options);
         },
 
         /**
@@ -348,7 +337,7 @@
             getAlias: function() {
                 return this.options.alias;
             },
-            /*
+            /**
              * Instead of calling View.trigger lets use custom function
              * It will notify the EventBus about new event
              */
@@ -361,12 +350,8 @@
 
     _.extend(EventBus.prototype, {
         pool: {},
-        /*
-        listeners = {
-            'view_alias': {
-                'event_name': fn
-            }
-        }
+        /**
+         * Add new listeners to the event bus
          */
         addListeners: function(selectors, controller) {
 
@@ -392,6 +377,9 @@
             }
         },
 
+        /**
+         * Execute event listener by given selector and event name
+         */
         fireEvent: function(selector, event, args) {
             var application = this.getApplication();
 
@@ -412,7 +400,7 @@
         },
 
         getApplication: function() {
-            return this.options['application'];
+            return this.application;
         }
     });
 
