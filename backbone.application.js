@@ -60,7 +60,7 @@
                 console.warn('Application has no name property defined. Global link was not created!');
             }
 
-            .each(this.allocationMap, function(name, key) {
+            _.each(this.allocationMap, function(name, key) {
                 nameSpace[name] = {};
             }, this);
         },
