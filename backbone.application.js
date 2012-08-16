@@ -45,23 +45,15 @@
                 if(typeof nameSpace[this.nameSpace] == 'undefined') {
                     nameSpace[this.nameSpace] = {}
                 }
-                nameSpace = nameSpace[this.nameSpace];
             }
 
             // let's have a link to the application namespace
             // this way we will be able to get all references to Models, Collections and Controllers
             // using givin namespace
-            this.nameSpace = nameSpace;
+            nameSpace[this.nameSpace] = this
             
-            if(this.name) {
-                nameSpace[this.name] = this;
-            }
-            else {
-                console.warn('Application has no name property defined. Global link was not created!');
-            }
-
             _.each(this.allocationMap, function(name, key) {
-                nameSpace[name] = nameSpace[name] || {};
+                this[name] = this[name] || {};
             }, this);
         },
         /**
@@ -89,7 +81,7 @@
         getClasseRefs: function(type, classes) {
             var hashMap = {},
                 allocationMap = this.allocationMap[type],
-                root = this.nameSpace[allocationMap];
+                root = this[allocationMap];
 
             _.each(classes, function(cls) {
                 var classReference = resolveNamespace(cls, root),
@@ -109,7 +101,7 @@
             this.controllers = {};
 
             _.each(controllers, function(ctrl) {
-                var root =  this.nameSpace[this.allocationMap.controller],
+                var root =  this[this.allocationMap.controller],
                     classReference = resolveNamespace(ctrl, root),
                     id = ctrl.split('.').pop();
 
@@ -121,7 +113,7 @@
                 controller.views = this.getClasseRefs('view', controller.views || []);
 
                 _.extend(this.models, this.getClasseRefs('model', controller.models || []));
-                _.extend(this.collections, this.getClasseRefs('collections', controller.collections || {}));
+                _.extend(this.collections, this.getClasseRefs('collection', controller.collections || {}));
 
                 this.buildCollections();
                 this.controllers[ctrl] = controller;
