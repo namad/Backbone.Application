@@ -76,9 +76,9 @@ new Backbone.Application({
 ```
 Обратите внимание, объявляя список контроллеров, мы используем строковый идентификатор, который не содержит `FormBuilder.Controllers`. Опираясь на свойство `nameSpace`, приложение автоматически попробует найти нужные классы. Фактически это означает, что в дальнейшем, при объявлении наших компонентов, мы будем использовать выбраный неймспейс. Например:
 ```Javascript
-_FormBuilder.Controllers_.service.RunTime = Backbone.Controller.extend({});
-_FormBuilder.Models_.Form = Backbone.Model.extend({});
-_FormBuilder.Views_.Form = Backbone.View.extend({});
+FormBuilder.Controllers.service.RunTime = Backbone.Controller.extend({});
+FormBuilder.Models.Form = Backbone.Model.extend({});
+FormBuilder.Views.Form = Backbone.View.extend({});
 ```
 
 ## Определяем контроллер
