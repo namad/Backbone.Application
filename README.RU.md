@@ -125,7 +125,7 @@ SteakMaker.Controllers.MeatManager = Backbone.Controller.extend({
 });
 ```
 
-У каждого контроллера есть callback `onLauch`, который можно использовать для начала работы. Давайте создадим модель `Form`, компонент `Kitchen` и отрендерим его на странице сразу после старта приложения.
+У каждого контроллера есть callback `onLauch`, который можно использовать для начала работы. Давайте создадим модель `Meat`, компонент `Kitchen` и отрендерим его на странице сразу после старта приложения.
 ```Javascript
 SteakMaker.Controllers.MeatManager = Backbone.Controller.extend({
 	...		
