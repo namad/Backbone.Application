@@ -17,19 +17,19 @@ ToDo.Controllers.ToDo = Backbone.Controller.extend({
     views: [
         'Portal',
         'ToDoItem'
-//        'Form',
-//        'List',
-//        
     ],
     
     initialize: function() {
         this.addListeners({
             'Portal': {
                 'todo.add': this.createNewTodo,
+                'toggle.completed': this.toggleComplete,
+                'clear.completed': this.clearCompleted
             },
             'ToDoItem': {
                 'todo.remove': this.removeTodo,
                 'todo.edit': this.editTodo,
+                'todo.save': this.saveTodo,
                 'todo.toggle': this.toggleTodo            
             }
         });
@@ -41,7 +41,6 @@ ToDo.Controllers.ToDo = Backbone.Controller.extend({
         this.getCollection('ToDos').on('reset', this.populateList, this);
         this.getCollection('ToDos').on('all', this.refreshPortalView, this);
         this.getCollection('ToDos').fetch();
-        
     },
     
     createNewTodo: function(data) {
@@ -57,23 +56,26 @@ ToDo.Controllers.ToDo = Backbone.Controller.extend({
         else if(data instanceof Backbone.Model) {
             model = data;
         }
-        
+
+        this.getCollection('ToDos').create(model);
+
         this.createView('ToDoItem', {
             renderTo: this.portal.$list,
             model: model
         });
-        
-        this.getCollection('ToDos').add(model);
-        
-        
+
     },
+
     refreshPortalView: function() {
         var collection = this.getCollection('ToDos');
-        this.portal.updateView(collection);
+        var done = collection.done().length;
+        var remaining = collection.remaining().length;
+
+        this.portal.updateView(done, remaining);
     },
+
     removeTodo: function(view) {
         view.model.destroy();
-        view.remove();
     },
     
     toggleTodo: function(view) {
@@ -81,13 +83,33 @@ ToDo.Controllers.ToDo = Backbone.Controller.extend({
     },
     
     editTodo: function(view) {
-        view.$el.addClass("editing");
-        view.input.focus();    
     },
-    
+
+    saveTodo: function(view, value) {
+        if (value) {
+            view.model.save({title: value});
+        }
+        else {
+            this.removeTodo(view);
+        }
+    },
+
     populateList: function() {
         this.getCollection('ToDos').each(this.createNewTodo, this);
+    },
+
+    clearCompleted: function() {
+        _.each(this.getCollection('ToDos').done(), function(todo){
+            todo.clear();
+        });
+    },
+
+    toggleComplete: function(view, state) {
+        this.getCollection('ToDos').each(function (todo) {
+            todo.save({'done': state});
+        });
     }
+
 });
 
 // Todo Model
@@ -118,7 +140,7 @@ ToDo.Models.ToDo = Backbone.Model.extend({
 
     // Remove this Todo from *localStorage* and delete its view.
     clear: function() {
-      this.destroy();
+        this.destroy();
     }
 });
 
@@ -181,29 +203,33 @@ ToDo.Views.ToDoItem = Backbone.View.extend({
     events: {
         "click .toggle": "toggleDone",
         "dblclick .view": "edit",
-        "click a.destroy": "clear",
+        "click a.destroy": "destroy",
         "keypress .edit": "updateOnEnter",
-        "blur .edit": "close"
+        "blur .edit": "save"
     },
 
     // The TodoView listens for changes to its model, re-rendering. Since there's
     // a one-to-one correspondence between a **Todo** and a **TodoView** in this
     // app, we set a direct reference on the model for convenience.
     initialize: function() {
-        this.model.on('change', this.render, this);
+        this.model.on('change', this.update, this);
+        this.model.on('destroy', this.remove, this);
         this.render()
     },
 
     // Re-render the titles of the todo item.
     render: function() {
-        var renderTo = this.options.renderTo;
+        this.update();
+
+        this.$el.appendTo(this.options.renderTo);
+        return this;
+    },
+
+    update: function() {
         var html = _.template(this.template.join(''), this.model.toJSON());
         this.$el.html(html);
         this.$el.toggleClass('done', this.model.get('done'));
         this.input = this.$('.edit');
-        
-        this.$el.appendTo(renderTo);
-        return this;
     },
 
     // Toggle the `"done"` state of the model.
@@ -213,25 +239,33 @@ ToDo.Views.ToDoItem = Backbone.View.extend({
 
     // Switch this view into `"editing"` mode, displaying the input field.
     edit: function() {
-        this.fireEvent('todo.edit', [this]);
+        this.$el.addClass("editing");
+        this.input.focus();
         return false;    
     },
 
     // Close the `"editing"` mode, saving changes to the todo.
     close: function() {
         var value = this.input.val();
-        if (!value) this.clear();
-        this.model.save({title: value});
-        this.$el.removeClass("editing");
+        this.fireEvent('todo.remove', [this, value]);
     },
 
     // If you hit `enter`, we're through editing the item.
     updateOnEnter: function(e) {
-        if (e.keyCode == 13) this.close();
+        if (e.keyCode == 13){
+            this.save();
+        }
     },
 
     // Remove the item, destroy the model.
-    clear: function(event) {        
+    save: function(event) {
+        var value = this.input.val();
+        this.$el.removeClass("editing");
+        this.fireEvent('todo.save', [this, value]);
+        return false;
+    },
+
+    destroy: function() {
         this.fireEvent('todo.remove', [this]);
         return false;
     }
@@ -296,25 +330,15 @@ ToDo.Views.Portal = Backbone.View.extend({
         "click #toggle-all": "toggleAllComplete"
     },
 
-    // At initialization we bind to the relevant events on the `Todos`
-    // collection, when items are added or changed. Kick things off by
-    // loading any preexisting todos that might be saved in *localStorage*.
     initialize: function() {
-
         this.$el.html(this.template.join(''));
+
         this.$input = this.$("#new-todo");
         this.allCheckbox = this.$("#toggle-all")[0];
-
-      //Todos.on('add', this.addOne, this);
-      //Todos.on('reset', this.addAll, this);
-      //Todos.on('all', this.render, this);
-
         this.$list = this.$('#todo-list');
         this.$footer = this.$('footer');
         this.$header = this.$('header');
         this.$main = this.$('#main');
-
-      //Todos.fetch();
     },
 
     render: function() {
@@ -324,21 +348,20 @@ ToDo.Views.Portal = Backbone.View.extend({
     
     // Re-rendering the App just means refreshing the statistics -- the rest
     // of the app doesn't change.
-    updateView: function(collection) {
-      var done = collection.done().length;
-      var remaining = collection.remaining().length;
+    updateView: function(done, remaining) {
+        var length = done + remaining;
 
-      if (collection.length) {
-        this.$main.show();
-        this.$footer.show();
-        this.$footer.html(this.statsTemplate({done: done, remaining: remaining}));
-      }
-      else {
-        this.$main.hide();
-        this.$footer.hide();
-      }
+        if (length) {
+            this.$main.show();
+            this.$footer.show();
+            this.$footer.html(this.statsTemplate({done: done, remaining: remaining}));
+        }
+        else {
+            this.$main.hide();
+            this.$footer.hide();
+        }
 
-      this.allCheckbox.checked = !remaining;
+        this.allCheckbox.checked = !remaining;
     },
 
     // If you hit return in the main input field, create new **Todo** model,
@@ -353,13 +376,13 @@ ToDo.Views.Portal = Backbone.View.extend({
 
     // Clear all done todo items, destroying their models.
     clearCompleted: function() {
-      _.each(Todos.done(), function(todo){ todo.clear(); });
-      return false;
+        this.fireEvent('clear.completed', [this]);
+        return false;
     },
 
     toggleAllComplete: function () {
-      var done = this.allCheckbox.checked;
-      Todos.each(function (todo) { todo.save({'done': done}); });
+        var done = this.allCheckbox.checked;
+        this.fireEvent('toggle.completed', [this, done]);
     }
 
 });
