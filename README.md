@@ -39,7 +39,7 @@ allocationMap: {
 }
 ```
 
-Fields model`, `collection`, `controller` and `view` are required. We can redefine or extend internal structure by redefining `allocationMap` config. 
+Fields `model`, `collection`, `controller` and `view` are required. We can redefine or extend internal structure by redefining `allocationMap` config. 
 For example:
 ```Javascript
 new Backbone.Application({
