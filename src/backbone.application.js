@@ -28,7 +28,7 @@
 
     _.extend(Application.prototype, {
         /**
-         * @cfg {Object} nameSpace
+         * @cfg {Object} nameSpace (required)
          * Define the application namespace       
          */
         nameSpace: 'Application',
@@ -38,12 +38,11 @@
         controllers: {},
         
         /**
-         * @cfg {Object} allocationMap
-         * Define the inner structure of our application object         
-         * @cfg {String} allocationMap.model
-         * @cfg {String} allocationMap.collection
-         * @cfg {String} allocationMap.controller
-         * @cfg {String} allocationMap.view
+         * @cfg allocationMap Define the inner structure of our application object
+         * @cfg allocationMap.model The key for models map
+         * @cfg allocationMap.collection The key for collections map
+         * @cfg allocationMap.controller The key for controllers map
+         * @cfg allocationMap.view The key for views map
          */        
         allocationMap: {
             model: 'Models',
@@ -82,7 +81,7 @@
         initialize: function() {},
 
         /**
-         * Called on documentReady. This is global callback is used to:
+         * Called when DOM is ready. This is global callback is used to:         
          * * Used to initialize controllers and execute {@link Backbone.Controller#onLaunch onLaunch} callback
          * * Execute {@link Backbone.Application#launch launch} callback
          */
@@ -153,7 +152,8 @@
         },
 
         /**
-         * Abstract fuction that will be called during application lauch
+         * Called during application lauch
+         * @template
          */
         launch: function() {},
 
@@ -205,7 +205,7 @@
         /**
          * Function to create new model instance
          * @param {String} name The name of the model that needs to be created
-         * @param {Object} options The list of option that should be passed to the model constructor
+         * @param {Object} [options] The list of option that should be passed to the model constructor
          */
         createModel: function(name, options) {
             var modelClass = this.getModelConstructor(name),
@@ -248,7 +248,7 @@
         /**
          * Function to create new collection instance
          * @param {String} name The name of the collection that needs to be created
-         * @param {Object} options The list of option that should be passed to the collection constructor         
+         * @param {Object} [options] The list of option that should be passed to the collection constructor         
          */	
         createCollection: function(name, options) {
             var collectionClass = this.getCollectionConstructor(name),
@@ -274,6 +274,7 @@
     if(typeof Backbone.Application == 'undefined') {
         Backbone.Application = Application;
         /**
+         * @method extend
          * Method to create new Backbone.Application class
          * @static
          */    
@@ -310,14 +311,14 @@
         },
 
         /**
-         * Callback fuction that will be executed after application lauch
+         * Called after application lauch
+         * @template
          */	
         onLaunch: function(application) {
         },
 
         /**
          * Getter that will return the reference to the application instance
-         
          */	
         getApplication: function() {
             return this.application;
@@ -408,6 +409,7 @@
     if(typeof Backbone.Controller == 'undefined') {
         Backbone.Controller = Controller;
         /**
+         * @method extend
          * Method to create new Backbone.Controller class
          * @static
          */
