@@ -1,8 +1,9 @@
-# Базовая реализация MVC для backbone.js
+# Basic implementation of the MVC pattern for backbone.js
 
-Backbone.Application - это простая и эффективная реализация MVC паттерна для backbone.js. В основе всего 2 новых класса, которые доступны в неймспейсе Backbone:
+`Backbone.Application` is simple and effective implementation of the MVC pattern for backbone.js. There are 3 base classes that gives that power to backbone:
 * Backbone.Application
 * Backbone.Controller
+* Backbone.EventBus
 
 # Usage
 ## Defining application and namespaces
