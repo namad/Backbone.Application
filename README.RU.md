@@ -161,3 +161,4 @@ SteakMaker.Views.Kitchen = Backbone.View.extend({
 Теперь все контроллеры могут подписаться на события от `Kitchen` и реагировать соотвествущим образом.
 
 ##Примеры
+* [Классический Backbone ToDo созданный с использованием MVC](http://namad.github.com/Backbone.Application/ToDo/)

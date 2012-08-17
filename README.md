@@ -163,3 +163,4 @@ SteakMaker.Views.Kitchen = Backbone.View.extend({
 That's it! All controllers, that are listen for the `Kitchen` events will know when it fire.
 
 ##Examples
+* [Classic Backbone ToDo created with MVC approach](http://namad.github.com/Backbone.Application/ToDo/)
