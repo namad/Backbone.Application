@@ -11,6 +11,10 @@
         return current;
     };
 
+    /**
+     * @class Backbone.Application
+     * @cfg {Object} options The list of options available within Application
+     */
     var Application = function(options) {
         _.extend(this, options || {});
         
@@ -23,12 +27,24 @@
     };
 
     _.extend(Application.prototype, {
-        name: 'Backbone.Application',
+        /**
+         * @cfg {Object} nameSpace
+         * Define the application namespace       
+         */
+        nameSpace: 'Application',
         
         models: {},
         collections: {},
         controllers: {},
         
+        /**
+         * @cfg {Object} allocationMap
+         * Define the inner structure of our application object         
+         * @cfg {String} allocationMap.model
+         * @cfg {String} allocationMap.collection
+         * @cfg {String} allocationMap.controller
+         * @cfg {String} allocationMap.view
+         */        
         allocationMap: {
             model: 'Models',
             collection: 'Collections',
@@ -36,6 +52,9 @@
             view: 'Views'
         },
 
+        /**
+         * Function to create inner sctructore of the application using {@link #allocationMap allocationMap} config
+         */           
         createApplicationNamespace: function() {
             var nameSpace = window;
 
@@ -56,15 +75,16 @@
                 this[name] = this[name] || {};
             }, this);
         },
+        
         /**
-         * Abstract fuction that will be called during application instance creation
+         * Fuction that will be called during application instance creation
          */
-        initialize: function(options) {
-            return this;
-        },
+        initialize: function() {},
 
         /**
-         * Called on documentReady
+         * Called on documentReady. This is global callback is used to:
+         * * Used to initialize controllers and execute {@link Backbone.Controller#onLaunch onLaunch} callback
+         * * Execute {@link Backbone.Application#launch launch} callback
          */
         onReady: function() {
             // initialize controllers
@@ -76,7 +96,10 @@
         },
 
         /**
-         * Function that will convert string identifier into the instance reference	 
+         * Function that will convert string identifier into the instance reference
+         * @param {String} type Type of instance that should be resolved. See {@link #allocationMap} for valid values
+         * @param {String[]} classes The list of class references
+         * @return {Object} The objects map
          */ 
         getClasseRefs: function(type, classes) {
             var hashMap = {},
@@ -121,7 +144,7 @@
         },
 
         /**
-         * Launch all controllers using onLauch callback
+         * Launch all controllers using {@link Backbone.Controller#onLaunch callback}
          */
         launchControllers: function() {
             _.each(this.controllers, function(ctrl, id) {
@@ -135,22 +158,26 @@
         launch: function() {},
 
         /**
-         * Abstract fuction that will be called during application lauch
+         * Function to add event listeners to the {@link #Backbone.EventBus EventBus}
          */
         addListeners: function(listeners, controller) {
             this.eventbus.addListeners(listeners, controller)
         },
 
         /**
-         * Getter to retreive link to the particular controller instance
+         * Getter to retreive link to the particular controller instance by name
+         * @param {String} name
+         * @return {Backbone.Controller} The controller instance
          */
-        getController: function(id) {
-            return this.controllers[id];
+        getController: function(name) {
+            return this.controllers[name];
         },
 
         /**
-         * Getter to retreive link to the particular model instance
+         * Getter to retreive link to the particular model instance by name
          * If model instance isn't created, create it
+         * @param {String} name
+         * @return {Backbone.Model} The model instance
          */
         getModel: function(name) {
             this._modelsCache = this._modelsCache || {};
@@ -167,7 +194,9 @@
         },
 
         /**
-         * Getter to retreive link to the particular model consturctor
+         * Getter to retreive link to the particular model consturctor by name
+         * @param {String} name
+         * @return {Backbone.Model} The model constructor
          */
         getModelConstructor: function(name) {
             return this.models[name];
@@ -175,6 +204,8 @@
 
         /**
          * Function to create new model instance
+         * @param {String} name The name of the model that needs to be created
+         * @param {Object} options The list of option that should be passed to the model constructor
          */
         createModel: function(name, options) {
             var modelClass = this.getModelConstructor(name),
@@ -186,8 +217,10 @@
         },
 
         /**
-         * Getter to retreive link to the particular collection instance
+         * Getter to retreive link to the particular collection instance by name
          * If collection instance isn't created, create it
+         * @param {String} name
+         * @return {Backbone.Collection} The collection instance         
          */
         getCollection: function(name) {
             this._collectionsCache = this._collectionsCache || {};
@@ -205,6 +238,8 @@
 
         /**
          * Getter to retreive link to the particular collection consturctor
+         * @param {String} name
+         * @return {Backbone.Collection} The collection constructor               
          */	
         getCollectionConstructor: function(name) {
             return this.collections[name];
@@ -212,6 +247,8 @@
 
         /**
          * Function to create new collection instance
+         * @param {String} name The name of the collection that needs to be created
+         * @param {Object} options The list of option that should be passed to the collection constructor         
          */	
         createCollection: function(name, options) {
             var collectionClass = this.getCollectionConstructor(name),
@@ -236,11 +273,20 @@
     // Since we are using Backbone let's make sure that there are no conflicts in namespaces
     if(typeof Backbone.Application == 'undefined') {
         Backbone.Application = Application;
+        /**
+         * Method to create new Backbone.Application class
+         * @static
+         */    
+        Backbone.Application.extend = Backbone.Model.extend;        
     }
     else {
         throw ('Native Backbone.Application instance already defined.')
     }
 
+    /**
+     * @class Backbone.Controller
+     * @cfg {Object} options The list of options available within Controller
+     */    
     var Controller = function(options) {
         _.extend(this, options || {});
         this.initialize.apply(this, arguments);
@@ -257,26 +303,30 @@
 
         /**
          * Add new listener to the application event bus
+         * Delegate to {@link Backbone.Application#addListeners addListeners} callback
          */
         addListeners: function(listeners) {
             this.getApplication().addListeners(listeners, this);
         },
 
         /**
-         * Abstract fuction that will be called during application lauch
+         * Callback fuction that will be executed after application lauch
          */	
         onLaunch: function(application) {
         },
 
         /**
          * Getter that will return the reference to the application instance
+         
          */	
         getApplication: function() {
             return this.application;
         },
 
         /**
-         * Getter that will return the reference to the view constructor
+         * Getter that will return the reference to the view constructor by name
+         * @param {String} name
+         * @return {Backbone.View} The view constructor            
          */		
         getViewConstructor: function(name) {
             return this.views[name];
@@ -285,6 +335,9 @@
         /**
          * Function to create a new view instance
          * All views are cached within _viewsCache hash map
+         * @param {String} name
+         * @param {Object} options Options to be passed within view constructor
+         * @return {Backbone.View} The view instance            
          */
         createView: function(name, options) {
             var view = this.getViewConstructor(name),
@@ -296,35 +349,40 @@
         },
 
         /**
-         * Delegate method to get model instance reference
+         * Method to get model instance reference by name
+         * Delegate to {@link Backbone.Application#getModel getModel} method
          */		
         getModel: function(name) {
             return this.application.getModel(name);
         },
 
         /**
-         * Delegate method to get model constructor reference
+         * Method to get model constructor reference by name
+         * Delegate to {@link Backbone.Application#getModelConstructor getModelConstructor} method
          */		
         getModelConstructor: function(name) {
             return this.application.getModelConstructor(name);
         },
 
         /**
-         * Delegate method to create model instance
+         * Method to create model instance by name
+         * Delegate to {@link Backbone.Application#createModel createModel} method
          */		
         createModel: function(name, options) {
             return this.application.createModel(name)
         },
 
         /**
-         * Delegate method to get collection instance reference
+         * Delegate method to get collection instance reference by name
+         * Delegate to {@link Backbone.Application#getCollection getCollection} method
          */		
         getCollection: function(name) {
             return this.application.getCollection(name);
         },
 
         /**
-         * Delegate method to get collection constructor reference
+         * Delegate method to get collection constructor reference by name
+         * Delegate to {@link Backbone.Application#getCollectionConstructor getCollectionConstructor} method
          */		
         getCollectionConstructor: function(name) {
             return this.application.getCollectionConstructor(name);
@@ -332,13 +390,15 @@
 
         /**
          * Delegate method to create collection instance
+         * Delegate to {@link Backbone.Application#createCollection createCollection} method
          */		
         createCollection: function(name, options) {
             return this.application.createCollection(name);
         },
 
         /**
-         * Delegate method to fire event
+         * Method to fire cross-controller event
+         * Delegate to {@link Backbone.Application#fireEvent fireEvent} method
          */		
         fireEvent: function(selector, event, args) {
             this.application.eventbus.fireEvent(selector, event, args);
@@ -347,11 +407,21 @@
 
     if(typeof Backbone.Controller == 'undefined') {
         Backbone.Controller = Controller;
+        /**
+         * Method to create new Backbone.Controller class
+         * @static
+         */
+        Backbone.Controller.extend = Backbone.Model.extend;        
     }
     else {
         throw ('Native Backbone.Controller instance already defined.')
     }
 
+    /**
+     * @class Backbone.EventBus
+     * @cfg {Object} options The list of options available within Controller
+     * @private
+     */     
     var EventBus = function(options) {
         var me = this;
 
@@ -438,7 +508,14 @@
         }
     });
 
-    Application.extend = Backbone.Model.extend;
-    Controller.extend = Backbone.Model.extend;
+    // Since we are using Backbone let's make sure that there are no conflicts in namespaces
+    if(typeof Backbone.EventBus == 'undefined') {
+        Backbone.EventBus = EventBus;
+    }
+    else {
+        throw ('Native Backbone.Application instance already defined.')
+    }
+    
+
 
 })();
