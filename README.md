@@ -29,7 +29,7 @@ window.SteakMaker = {
 console.log(SteakMaker instanceof Backbone.Application); // -> true
 ```
 
-The application will automatically define namespace using `nameSpace` config. Internal strcuture will be created based on 'allocationMap' properties. THe default values of the 'allocationMap' is the following:
+The application will automatically define namespace using `nameSpace` config. Internal strcuture will be created based on `'allocationMap'`properties. THe default values of the `'allocationMap'` is the following:
 ```Javascript
 allocationMap: {
     model: 'Models',
