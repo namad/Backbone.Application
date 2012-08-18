@@ -2,17 +2,19 @@
  * Lets create new application instance with ToDo namespace defined
  */
 new Backbone.Application({
-    nameSpace: 'ToDo',
+    nameSpace: 'ToDoApplication',
     controllers : [
         'ToDo'
     ]
 });
 
+console.log('ToDoApplication has been created! ', ToDoApplication);
+
 /**
  * This is out main controller which will do most of job
  * It will listen for view and collection events and manage all data-related operations
  */
-ToDo.Controllers.ToDo = Backbone.Controller.extend({
+ToDoApplication.Controllers.ToDo = Backbone.Controller.extend({
     // Specifying a ToDo model
     models: [
         'ToDo'
@@ -148,7 +150,7 @@ ToDo.Controllers.ToDo = Backbone.Controller.extend({
  * Todo Model
  * Our basic Todo model has `title`, `order`, and `done` attributes.
  */
-ToDo.Models.ToDo = Backbone.Model.extend({
+ToDoApplication.Models.ToDo = Backbone.Model.extend({
 
     // Default attributes for the todo item.
     defaults: function() {
@@ -181,10 +183,10 @@ ToDo.Models.ToDo = Backbone.Model.extend({
  * Todo Collection
  * The collection of todos is backed by *localStorage* instead of a remote server.
  */
-ToDo.Collections.ToDos = Backbone.Collection.extend({
+ToDoApplication.Collections.ToDos = Backbone.Collection.extend({
 
     // Reference to this collection's model.
-    model: ToDo.Models.ToDo,
+    model: ToDoApplication.Models.ToDo,
 
     // Save all of the todo items under the `"todos"` namespace.
     localStorage: new Store("todos-backbone"),
@@ -217,7 +219,7 @@ ToDo.Collections.ToDos = Backbone.Collection.extend({
  * Todo Item View
  * The DOM element for a todo item...
  */
-ToDo.Views.ToDoItem = Backbone.View.extend({
+ToDoApplication.Views.ToDoItem = Backbone.View.extend({
 
     //... is a list tag.
     tagName:  "li",
@@ -307,7 +309,7 @@ ToDo.Views.ToDoItem = Backbone.View.extend({
 // The Application
 // ---------------
 // Our overall **AppView** is the top-level piece of UI.
-ToDo.Views.Portal = Backbone.View.extend({
+ToDoApplication.Views.Portal = Backbone.View.extend({
     // Instead of generating a new element, bind to the existing skeleton of
     // the App already present in the HTML.
     template: _.template(
