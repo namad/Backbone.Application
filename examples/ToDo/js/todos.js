@@ -312,40 +312,38 @@ ToDoApplication.Views.ToDoItem = Backbone.View.extend({
 ToDoApplication.Views.Portal = Backbone.View.extend({
     // Instead of generating a new element, bind to the existing skeleton of
     // the App already present in the HTML.
-    template: _.template(
-        ([
-            '<div id="todoapp">',
+    template: [
+        '<div id="todoapp">',
 
-                '<header>',
-                    '<h1>Todos</h1>',
-                    '<input id="new-todo" type="text" placeholder="What needs to be done?">',
-                '</header>',
+            '<header>',
+                '<h1>Todos</h1>',
+                '<input id="new-todo" type="text" placeholder="What needs to be done?">',
+            '</header>',
 
-                '<section id="main">',
-                    '<input id="toggle-all" type="checkbox">',
-                    '<label for="toggle-all">Mark all as complete</label>',
-                    '<ul id="todo-list"></ul>',
-                '</section>',
+            '<section id="main">',
+                '<input id="toggle-all" type="checkbox">',
+                '<label for="toggle-all">Mark all as complete</label>',
+                '<ul id="todo-list"></ul>',
+            '</section>',
 
-                '<footer>',
-                    '<a id="clear-completed">Clear completed</a>',
-                    '<div id="todo-count"></div>',
-                '</footer>',
+            '<footer>',
+                '<a id="clear-completed">Clear completed</a>',
+                '<div id="todo-count"></div>',
+            '</footer>',
 
-            '</div>',
+        '</div>',
 
-            '<div id="instructions">',
-                'Double-click to edit a todo.',
-            '</div>',
+        '<div id="instructions">',
+            'Double-click to edit a todo.',
+        '</div>',
 
-            '<div id="credits">',
-                'Created by',
-                '<br />',
-                '<a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.',
-                '<br />Rewritten by: <a href="http://addyosmani.github.com/todomvc">TodoMVC</a>.',
-            '</div>'
-        ]).join('')
-    ),
+        '<div id="credits">',
+            'Created by',
+            '<br />',
+            '<a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.',
+            '<br />Rewritten with: <a href="https://github.com/namad/Backbone.Application/tree/master/examples/ToDo">TodoMVC</a>.',
+        '</div>'
+    ],
 
     // Our template for the line of statistics at the bottom of the app.
     statsTemplate: _.template(
