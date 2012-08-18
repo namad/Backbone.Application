@@ -341,7 +341,7 @@ ToDoApplication.Views.Portal = Backbone.View.extend({
             'Created by',
             '<br />',
             '<a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.',
-            '<br />Rewritten with: <a href="http://namad.github.com/Backbone.Application/ToDo/">TodoMVC</a>.',
+            '<br />Rewritten with: <a href="https://github.com/namad/Backbone.Application/tree/master/examples/ToDo">TodoMVC</a>.',
         '</div>'
     ],
 
